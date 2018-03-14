@@ -1,7 +1,7 @@
 clearvars -except times;close all;warning off;
 set(0,'defaultfigurecolor','w');
-addpath ..\..\library
-addpath ..\..\library\matlab
+addpath ..\library
+addpath ..\library\matlab
 
 ip = '192.168.2.2';
 addpath BPSK\transmitter
