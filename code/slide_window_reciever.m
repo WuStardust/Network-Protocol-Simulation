@@ -3,7 +3,7 @@ set(0,'defaultfigurecolor','w');
 addpath ..\library
 addpath ..\library\matlab
 
-ip = '192.168.2.2';
+ip = '192.168.2.1';
 addpath BPSK\transmitter
 addpath BPSK\receiver
 
@@ -22,14 +22,14 @@ input = cell(1, s.in_ch_no + length(s.iio_dev_cfg.cfg_ch));
 output = cell(1, s.out_ch_no + length(s.iio_dev_cfg.mon_ch));
 
 % Set the attributes of AD9361
-input{s.getInChannel('RX_LO_FREQ')} = 1e9;
+input{s.getInChannel('RX_LO_FREQ')} = 3e9;
 input{s.getInChannel('RX_SAMPLING_FREQ')} = 40e6;
-input{s.getInChannel('RX_RF_BANDWIDTH')} = 20e6;
+input{s.getInChannel('RX_RF_BANDWIDTH')} = 80e6;
 input{s.getInChannel('RX1_GAIN_MODE')} = 'manual';%% slow_attack manual
 input{s.getInChannel('RX1_GAIN')} = 10;
 % input{s.getInChannel('RX2_GAIN_MODE')} = 'slow_attack';
 % input{s.getInChannel('RX2_GAIN')} = 0;
-input{s.getInChannel('TX_LO_FREQ')} = 1e9;
+input{s.getInChannel('TX_LO_FREQ')} = 3e9;
 input{s.getInChannel('TX_SAMPLING_FREQ')} = 40e6;
 input{s.getInChannel('TX_RF_BANDWIDTH')} = 20e6;
 
@@ -50,22 +50,24 @@ recievedBuffer = cell(1, windowSize);
 isRecievedBuffer = zeros(1, windowSize);
 
 while(1)
-%     strToSend = [char(5), char(5), 'asdfg'];
+%     strToSend = [char(0), char(12), 'asdfgasdfgh\n'];
+%     fprintf(strToSend);
 %     txdata = bpsk_tx_func(strToSend);
 %     txdata = round(txdata .* 2^14);
 %     txdata=repmat(txdata, 8,1);
 %     input{1} = real(txdata);
 %     input{2} = imag(txdata);
-%     sendData(s, input);    
+%     sendData(s, input);
+%     continue;
 
     output = recieveData(s);
     I = output{1};
     Q = output{2};
     Rx = I+1i*Q;
-    [rStr, isRecieved] = bpsk_rx_func(Rx(end/2:end));
+    [rStr, isRecieved] = bpsk_rx_func(Rx(end/2:end))
 
     % 判断crc校验结果
-    if (isRecieved)
+    if (isRecieved && ~isempty(rStr))
         recievedSeq = abs(rStr(1, 1));
         frameLength = abs(rStr(1, 2));
         fprintf('recieved frame seq: %d\nframeLength: %d\nrStr data: %s\n', abs(recievedSeq), abs(frameLength), rStr);
@@ -79,6 +81,7 @@ while(1)
             input{1} = real(txdata);
             input{2} = imag(txdata);
             sendData(s, input);
+            fprintf('send ACK %d', startSeq);
             continue;
         end
 
@@ -96,6 +99,7 @@ while(1)
         input{1} = real(txdata);
         input{2} = imag(txdata);
         sendData(s, input);
+        fprintf('send ACK %d', startSeq);
     end
 end
 

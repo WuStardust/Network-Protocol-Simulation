@@ -3,7 +3,8 @@ set(0,'defaultfigurecolor','w');
 addpath ..\library
 addpath ..\library\matlab
 
-ip = '192.168.2.2';
+ip = '192.168.2.1';
+%% 
 addpath BPSK\transmitter
 addpath BPSK\receiver
 
